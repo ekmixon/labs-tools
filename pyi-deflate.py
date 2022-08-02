@@ -98,9 +98,7 @@ def malicious_check(script_contents):
         return('Likely Malicious')
     if score >= 3:
         return('Potentially Malicious')
-    if score >= 2:
-        return('Highly Suspicious')
-    return('Likely Benign')
+    return 'Highly Suspicious' if score >= 2 else 'Likely Benign'
 
 
 def screen_size():
@@ -115,7 +113,7 @@ if __name__ == '__main__':
     try:
         filename = sys.argv[1]
     except:
-        print('Usage: %s [filename]' % __file__)
+        print(f'Usage: {__file__} [filename]')
         sys.exit()
 
     try:
@@ -127,9 +125,11 @@ if __name__ == '__main__':
             data = patch_zlib(manual_bin)
             if data:
                 rating = malicious_check(data)
-                data = ('{}\n# Script: {} ({})\n'.format(
-                    manual_warn, 'UNKNOWN_NAME', rating) +
-                    '\n'.join(['\t' + indent for indent in data.split('\n')]))
+                data = (
+                    f'{manual_warn}\n# Script: UNKNOWN_NAME ({rating})\n'
+                    + '\n'.join(['\t' + indent for indent in data.split('\n')])
+                )
+
             rows = screen_size()
             if len(data.split('\n')) > int(rows):
                 pager(data)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
             print(data)
             sys.exit()
         except:
-            print('{}. Unable to carve anything manually.'.format(err))
+            print(f'{err}. Unable to carve anything manually.')
         sys.exit()
 
     redirect_stdout()
@@ -153,7 +153,10 @@ if __name__ == '__main__':
         data = data.decode('utf-8')
         rating = malicious_check(data)
         if data:
-            data = '# Script: {} ({})\n'.format(script_name, rating) + '\n'.join(['\t' + indent for indent in data.split('\n')])
+            data = f'# Script: {script_name} ({rating})\n' + '\n'.join(
+                ['\t' + indent for indent in data.split('\n')]
+            )
+
         if len(data.split('\n')) > int(rows):
             pager(data)
             sys.exit()
